@@ -65,64 +65,6 @@ function poissonWith(lam, random) {
   return k - 1;
 }
 
-// Rolling ops
-function padZeroLeft(xs, n) {
-  const out = new Float64Array(xs.length + n);
-  // first n are already 0
-  out.set(xs, n);
-  return out;
-}
-
-function rollingSum(xs, window) {
-  const padded = padZeroLeft(xs, window - 1);
-  const cumsum = new Float64Array(padded.length);
-  let running = 0;
-  for (let i = 0; i < padded.length; i++) {
-    running += padded[i];
-    cumsum[i] = running;
-  }
-  const out = new Float64Array(xs.length);
-  for (let i = 0; i < xs.length; i++) {
-    out[i] = cumsum[i + window - 1] - (i > 0 ? cumsum[i - 1] : 0);
-  }
-  return out;
-}
-
-function rollingExtrema(xs, window, cmp) {
-  // General sliding window extrema via deque (O(n))
-  const n = xs.length;
-  const out = new Float64Array(n);
-  const deq = []; // store indices
-  // prefill with window-1 zeros on left
-  const padded = padZeroLeft(xs, window - 1);
-  for (let i = 0; i < padded.length; i++) {
-    const val = padded[i];
-    while (deq.length) {
-      const backVal = padded[deq[deq.length - 1]];
-      // cmp is a comparison function: (a, b) => a <= b for max, a >= b for min
-      if (cmp(backVal, val)) deq.pop(); else break;
-    }
-    deq.push(i);
-    const start = i - window + 1;
-    if (start >= 0) {
-      while (deq[0] < start) deq.shift();
-      const outIdx = start;
-      out[outIdx] = padded[deq[0]];
-    }
-  }
-  return out;
-}
-
-function rollingMax(xs, window) {
-  // Largest value in window
-  return rollingExtrema(xs, window, (a, b) => a <= b);
-}
-
-function rollingMin(xs, window) {
-  // Smallest value in window
-  return rollingExtrema(xs, window, (a, b) => a >= b);
-}
-
 function reshapeMeanPerMinute(xsSeconds) {
   // assumes length divisible by 60
   const minutes = xsSeconds.length / 60;
