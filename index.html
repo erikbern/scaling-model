@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Serverless Queuing Theory Model (JS)</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  </head>
+  <body>
+    <main>
+      <section class="controls">
+        <button id="regenerate" type="button">regenerate</button>
+      </section>
+      <section class="controls">
+        <label for="requests-per-minute">
+          <span style="font-size: 0.93em; display: inline-block; width: 200px;">Requests/min: <span id="requests-per-minute-value" style="display: inline-block; min-width: 28px; text-align: right;">100</span></span>
+          <input id="requests-per-minute" type="range" min="0" max="1000" step="1" value="0" style="width: 300px; vertical-align: middle;" />
+        </label>
+        <label for="execution-time">
+          <span style="font-size: 0.93em; display: inline-block; width: 200px;">Execution time: <span id="execution-time-value" style="display: inline-block; min-width: 28px; text-align: right;">10</span></span>
+          <input id="execution-time" type="range" min="0" max="1000" step="1" value="0" style="width: 300px; vertical-align: middle;" />
+        </label>
+      </section>
+      <section class="controls">
+        <label for="keepalive-time">
+          <span style="font-size: 0.93em; display: inline-block; width: 200px;">Keepalive time: <span id="keepalive-time-value" style="display: inline-block; min-width: 28px; text-align: right;">60</span></span>
+          <input id="keepalive-time" type="range" min="0" max="1000" step="1" value="0" style="width: 300px; vertical-align: middle;" />
+        </label>
+        <label for="coldstart-time">
+          <span style="font-size: 0.93em; display: inline-block; width: 200px;">Cold start time: <span id="coldstart-time-value" style="display: inline-block; min-width: 28px; text-align: right;">60</span></span>
+          <input id="coldstart-time" type="range" min="0" max="1000" step="1" value="0" style="width: 300px; vertical-align: middle;" />
+        </label>
+      </section>
+      <section class="controls">
+        <label for="buffer-containers">
+          <span style="font-size: 0.93em; display: inline-block; width: 200px;">Buffer containers: <span id="buffer-containers-value" style="display: inline-block; min-width: 28px; text-align: right;">0</span></span>
+          <input id="buffer-containers" type="range" min="0" max="100" step="1" value="0" style="width: 300px; vertical-align: middle;" />
+        </label>
+        <label for="warm-containers"> 
+          <span style="font-size: 0.93em; display: inline-block; width: 200px;">Warm containers: <span id="warm-containers-value" style="display: inline-block; min-width: 28px; text-align: right;">0</span></span>
+          <input id="warm-containers" type="range" min="0" max="100" step="1" value="0" style="width: 300px; vertical-align: middle;" />
+        </label>
+      </section>
+
+      <section>
+        <p class="metric">
+          <span id="total-cost"></span>
+          <span id="utilization-rate"></span>
+          <span id="buffer-containers"></span>
+        </p>
+      </section>
+
+      <section>
+        <div id="chart-number-containers" class="chart"></div>
+      </section>
+
+      
+
+    <script type="module" src="app.js"></script>
+  </body>
+  </html>
+
+
