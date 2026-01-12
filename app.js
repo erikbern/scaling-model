@@ -284,8 +284,16 @@ function formatSecondsHuman(totalSeconds) {
   return `${m} min`;
 }
 
-// Cost per container per hour (USD)
-const CONTAINER_COST = 3.95;
+// Cost per container per hour (USD) - now configurable via slider
+// Default: $3.95
+
+function sliderToDollars(v) {
+  return Number(v) / 100; // Slider value is in cents
+}
+
+function formatDollars(amount) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+}
 
 // D3 chart helpers
 function clearChart(sel) {
@@ -338,17 +346,17 @@ function stackedAreaWithRightLine({ sel, containers, x, series, colors, yLabelLe
     .attr("class", "grid grid-x")
     .attr("transform", `translate(0,${h})`)
     .call(xGrid)
-    .selectAll(".tick line").attr("stroke", "#a9afc3").attr("opacity", 0.15);
+    .selectAll(".tick line").attr("stroke", "#aaaaaa").attr("opacity", 0.15);
   g.selectAll(".grid.grid-x .domain").remove();
   g.append("g")
     .attr("class", "grid grid-y")
     .call(yGrid)
-    .selectAll(".tick line").attr("stroke", "#a9afc3").attr("opacity", 0.15);
+    .selectAll(".tick line").attr("stroke", "#aaaaaa").attr("opacity", 0.15);
   g.selectAll(".grid.grid-y .domain").remove();
 
   const gx = g.append("g").attr("transform", `translate(0,${h})`).call(xAxis);
-  gx.selectAll("text").attr("fill", "#a9afc3");
-  gx.selectAll(".domain, .tick line").attr("stroke", "#a9afc3").attr("opacity", 0.3);
+  gx.selectAll("text").attr("fill", "#aaaaaa");
+  gx.selectAll(".domain, .tick line").attr("stroke", "#aaaaaa").attr("opacity", 0.3);
   g.append("g").call(yAxisLeft).append("text")
     .attr("fill", "currentColor").attr("x", 4).attr("y", -8)
     .text(yLabelLeft ?? "");
@@ -385,11 +393,11 @@ function stackedAreaWithRightLine({ sel, containers, x, series, colors, yLabelLe
   series.forEach((s, i) => {
     const row = legend.append("g").attr("transform", `translate(${i * 160 + 20},0)`);
     row.append("rect").attr("width", 12).attr("height", 12).attr("fill", colors[i] ?? `hsl(${i * 60}, 70%, 55%)`).attr("opacity", 0.6);
-    row.append("text").attr("x", 16).attr("y", 10).attr("fill", "#a9afc3").attr("font-size", 12).text(s.label);
+    row.append("text").attr("x", 16).attr("y", 10).attr("fill", "#aaaaaa").attr("font-size", 12).text(s.label);
   });
   const lineRow = legend.append("g").attr("transform", `translate(${series.length * 160 + 20},0)`);
   lineRow.append("line").attr("x1", 0).attr("x2", 24).attr("y1", 6).attr("y2", 6).attr("stroke", "#fff").attr("stroke-width", 2).attr("stroke-dasharray", "6,4");
-  lineRow.append("text").attr("x", 28).attr("y", 10).attr("fill", "#a9afc3").attr("font-size", 12).text("Avg queue time");
+  lineRow.append("text").attr("x", 28).attr("y", 10).attr("fill", "#aaaaaa").attr("font-size", 12).text("Avg queue time");
 }
 
 function run() {
@@ -426,14 +434,14 @@ function run() {
   });
 
   // Compute total cost over the selected period
+  const pricePerHour = sliderToDollars(document.getElementById('price-per-hour')?.value ?? 395);
   const totalContainerMinutes = containers.reduce((acc, d) => acc + d.total, 0);
   const busyContainerMinutes = containers.reduce((acc, d) => acc + d.busy, 0);
   const totalContainerHours = totalContainerMinutes / 60;
-  const totalCost = totalContainerHours * CONTAINER_COST;
+  const totalCost = totalContainerHours * pricePerHour;
   const costEl = document.getElementById('total-cost');
   if (costEl) {
-    const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalCost);
-    costEl.textContent = `Total cost: ${formatted}`;
+    costEl.textContent = `7-day cost: ${formatDollars(totalCost)}`;
   }
 
   // Compute and render utilization rate over the full period
@@ -452,12 +460,14 @@ function wireParameterControls() {
   const c = document.getElementById('coldstart-time');
   const b = document.getElementById('buffer-containers');
   const w = document.getElementById('warm-containers');
+  const p = document.getElementById('price-per-hour');
   const rv = document.getElementById('requests-per-minute-value');
   const ev = document.getElementById('execution-time-value');
   const kv = document.getElementById('keepalive-time-value');
   const cv = document.getElementById('coldstart-time-value');
   const bv = document.getElementById('buffer-containers-value');
   const wv = document.getElementById('warm-containers-value');
+  const pv = document.getElementById('price-per-hour-value');
   // initialize slider knob positions from defaults
   if (r) r.value = String(rpmToSlider(100));
   if (e) e.value = String(secondsToSlider(10));
@@ -465,6 +475,7 @@ function wireParameterControls() {
   if (c) c.value = String(secondsToSlider(60));
   if (b) b.value = String(0);
   if (w) w.value = String(0);
+  if (p) p.value = String(395);
   const updateLabels = () => {
     if (rv && r) rv.textContent = formatRpmHuman(sliderToRpm(r.value));
     if (ev && e) ev.textContent = formatSecondsHuman(sliderToSeconds(e.value));
@@ -472,12 +483,13 @@ function wireParameterControls() {
     if (cv && c) cv.textContent = formatSecondsHuman(sliderToSeconds(c.value));
     if (bv && b) bv.textContent = String(Math.round(b.value));
     if (wv && w) wv.textContent = String(Math.round(w.value));
+    if (pv && p) pv.textContent = formatDollars(sliderToDollars(p.value));
   };
   const regenerateDataFromControls = () => {
     const baseRate = sliderToRpm(r?.value ?? rpmToSlider(100));
     demandData = generateData({ startDate: DEFAULT_START, endDate: DEFAULT_END, seed: DEFAULT_SEED, baseRate });
   };
-  [e, k, c, b, w].forEach(input => {
+  [e, k, c, b, w, p].forEach(input => {
     if (!input) return;
     input.addEventListener('input', () => { updateLabels(); run(); });
     input.addEventListener('change', () => { updateLabels(); run(); });

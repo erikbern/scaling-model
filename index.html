@@ -3,14 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Serverless Queuing Theory Model (JS)</title>
+    <title>Modal Price Estimator</title>
     <link rel="stylesheet" href="styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   </head>
   <body>
+    <header>
+      <img src="modal-logo.png" alt="Modal" class="logo" style="height: 30px; margin-bottom: 12px;" />
+      <h1>Modal Price Estimator</h1>
+      <p>Interactive simulator for analyzing container lifecycle and cost optimization</p>
+    </header>
     <main>
       <section class="controls">
-        <button id="regenerate" type="button">regenerate</button>
+        <button id="regenerate" type="button">Regenerate</button>
       </section>
       <section class="controls">
         <label for="requests-per-minute">
@@ -37,9 +42,15 @@
           <span style="font-size: 0.93em; display: inline-block; width: 200px;">Buffer containers: <span id="buffer-containers-value" style="display: inline-block; min-width: 28px; text-align: right;">0</span></span>
           <input id="buffer-containers" type="range" min="0" max="100" step="1" value="0" style="width: 300px; vertical-align: middle;" />
         </label>
-        <label for="warm-containers"> 
+        <label for="warm-containers">
           <span style="font-size: 0.93em; display: inline-block; width: 200px;">Warm containers: <span id="warm-containers-value" style="display: inline-block; min-width: 28px; text-align: right;">0</span></span>
           <input id="warm-containers" type="range" min="0" max="100" step="1" value="0" style="width: 300px; vertical-align: middle;" />
+        </label>
+      </section>
+      <section class="controls">
+        <label for="price-per-hour">
+          <span style="font-size: 0.93em; display: inline-block; width: 200px;">Price per hour: <span id="price-per-hour-value" style="display: inline-block; min-width: 28px; text-align: right;">$3.95</span></span>
+          <input id="price-per-hour" type="range" min="25" max="650" step="5" value="395" style="width: 300px; vertical-align: middle;" />
         </label>
       </section>
 
